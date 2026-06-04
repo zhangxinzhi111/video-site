@@ -332,7 +332,7 @@ document.addEventListener('click', function(e) {
   }
   // Close mobile search on click outside
   var box = document.getElementById('searchBox');
-  if (box.classList.contains('visible-mobile') && !box.contains(e.target) && e.target.id !== 'searchToggle') {
+  if (box.classList.contains('visible-mobile') && !box.contains(e.target) && !e.target.closest('#searchToggle')) {
     closeMobileSearch();
   }
 });
@@ -362,9 +362,9 @@ window.addEventListener('resize', updateMobileUI);
 // ===== Config =====
 var API_BASE = 'https://api.apibdzy.com/api.php/provide/vod/';
 var CORS_PROXIES = [
-  'https://api.codetabs.com/v1/proxy/?quest=',
   'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url='
+  'https://api.allorigins.win/raw?url=',
+  'https://api.codetabs.com/v1/proxy/?quest='
 ];
 var activeProxyIdx = 0;
 var activeProxy = CORS_PROXIES[0];
@@ -393,31 +393,54 @@ function showLoading(show) {
   document.getElementById('loadingBar').style.display = show ? 'block' : 'none';
 }
 
-function fetchWithProxy(url) {
+function fetchWithTimeout(url, ms) {
+  ms = ms || 10000;
+  var ctrl = new AbortController();
+  var timer = setTimeout(function() { ctrl.abort(); }, ms);
+  return fetch(url, { signal: ctrl.signal }).finally(function() { clearTimeout(timer); });
+}
+
+function fetchWithProxy(url, options) {
+  options = options || {};
+  var TIMEOUT = options.timeout || 12000;
   return new Promise(function(resolve, reject) {
-    var proxyUrl = activeProxy + encodeURIComponent(url);
-    fetch(proxyUrl)
-      .then(function(r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      })
-      .then(resolve)
-      .catch(function(err) {
-        // Try next proxy
-        if (activeProxyIdx < CORS_PROXIES.length - 1) {
-          activeProxyIdx++;
-          activeProxy = CORS_PROXIES[activeProxyIdx];
-          var nextUrl = activeProxy + encodeURIComponent(url);
-          fetch(nextUrl).then(function(r2) {
-            if (!r2.ok) throw new Error('HTTP ' + r2.status);
-            return r2.json();
-          }).then(resolve).catch(reject);
-        } else {
-          activeProxyIdx = 0;
-          activeProxy = CORS_PROXIES[0];
-          reject(err);
-        }
-      });
+    // Try each proxy in sequence
+    var tryProxy = function(idx) {
+      if (idx >= CORS_PROXIES.length) {
+        // All proxies failed, try direct fetch as last resort
+        console.log('[Fetch] All proxies failed, trying direct fetch...');
+        fetchWithTimeout(url, TIMEOUT)
+          .then(function(r) {
+            if (!r.ok) throw new Error('Direct HTTP ' + r.status);
+            return r.json();
+          })
+          .then(resolve)
+          .catch(function(e) {
+            console.error('[Fetch] Direct fetch also failed:', e.message);
+            reject(new Error('网络请求失败，请检查网络或稍后重试'));
+          });
+        return;
+      }
+      var proxyUrl = CORS_PROXIES[idx] + encodeURIComponent(url);
+      console.log('[Fetch] Trying proxy #' + idx + ':', CORS_PROXIES[idx].split('/')[2]);
+      fetchWithTimeout(proxyUrl, TIMEOUT)
+        .then(function(r) {
+          if (!r.ok) throw new Error('Proxy #' + idx + ' HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(data) {
+          // Success: remember this working proxy
+          activeProxyIdx = idx;
+          activeProxy = CORS_PROXIES[idx];
+          console.log('[Fetch] Proxy #' + idx + ' succeeded');
+          resolve(data);
+        })
+        .catch(function(err) {
+          console.warn('[Fetch] Proxy #' + idx + ' failed:', err.message);
+          tryProxy(idx + 1);
+        });
+    };
+    tryProxy(0);
   });
 }
 
@@ -496,6 +519,28 @@ function apiHome(pg) {
   return fetchApi({ ac: 'videolist', pg: pg || 1, pagesize: 20 }).then(normalizeVideoList);
 }
 
+// Batch concurrent requests to avoid overloading
+function batchFetchAll(urls, batchSize) {
+  batchSize = batchSize || 3;
+  var results = [];
+  var idx = 0;
+  return new Promise(function(resolve, reject) {
+    function nextBatch() {
+      if (idx >= urls.length) { resolve(results); return; }
+      var slice = urls.slice(idx, idx + batchSize);
+      idx += batchSize;
+      Promise.all(slice.map(function(u) {
+        return fetchWithProxy(u).catch(function(e) { console.warn('[Batch] Failed:', e.message); return null; });
+      })).then(function(batchResults) {
+        results = results.concat(batchResults);
+        // Small delay between batches
+        setTimeout(nextBatch, 200);
+      }).catch(reject);
+    }
+    nextBatch();
+  });
+}
+
 function apiList(t, pg) {
   if (!t) return apiHome(pg);
   var subIds = CAT_MAP[t];
@@ -504,9 +549,8 @@ function apiList(t, pg) {
     if (state.catPageCache[cacheKey]) {
       return Promise.resolve(state.catPageCache[cacheKey]);
     }
-    return Promise.all(
-      subIds.map(function(id) { return fetchApi({ ac: 'videolist', t: id, pg: 1, pagesize: 10 }); })
-    ).then(function(results) {
+    var urls = subIds.map(function(id) { return buildApiUrl({ ac: 'videolist', t: id, pg: 1, pagesize: 10 }); });
+    return batchFetchAll(urls, 3).then(function(results) {
       var all = [];
       var total = 0;
       for (var i = 0; i < results.length; i++) {
@@ -1000,9 +1044,48 @@ function playEpisode(index, seekTo) {
 }
 
 function fallbackIframe(container, url) {
-  container.innerHTML = '<iframe src="'+esc(url)+'" allowfullscreen></iframe>';
+  container.innerHTML = '<iframe src="'+esc(url)+'" sandbox="allow-scripts allow-same-origin allow-presentation" allowfullscreen></iframe>';
   stopProgressSave();
 }
+
+// ===== Block ads / popups =====
+(function blockAds() {
+  // Override window.open to block popup ads
+  var _origOpen = window.open;
+  window.open = function() {
+    console.log('[AdBlock] Blocked window.open:', arguments[0]);
+    return null;
+  };
+  // Block top-level navigation from iframes via beforeunload guard
+  var detailOpened = false;
+  window.addEventListener('beforeunload', function(e) {
+    if (!detailOpened) {
+      // Only block if we're on the main site, not intentional navigation
+      // Allow normal navigation, just log
+    }
+  });
+  // Guard against iframe trying to redirect top
+  try {
+    Object.defineProperty(window, 'top', {
+      get: function() { return window; }
+    });
+  } catch(e) {}
+  // Block common ad networks via fetch interception (best-effort)
+  var adPatterns = ['ad.', 'ads.', 'pop.', 'popup', 'advert', 'doubleclick', 'googlesyndication'];
+  var _origFetch = window.fetch;
+  window.fetch = function(url) {
+    var u = url || '';
+    if (typeof u === 'string') {
+      for (var i = 0; i < adPatterns.length; i++) {
+        if (u.indexOf(adPatterns[i]) > -1) {
+          console.log('[AdBlock] Blocked fetch to:', u);
+          return Promise.reject(new Error('Blocked ad request'));
+        }
+      }
+    }
+    return _origFetch.apply(this, arguments);
+  };
+})();
 
 // ===== Navigation =====
 function goHome() {
