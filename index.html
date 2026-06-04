@@ -369,24 +369,17 @@ window.addEventListener('resize', updateMobileUI);
 
 // ===== Config =====
 var API_BASE = 'https://api.apibdzy.com/api.php/provide/vod/';
-var CORS_PROXIES = [
-  'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url=',
-  'https://api.codetabs.com/v1/proxy/?quest='
-];
-var activeProxyIdx = 0;
-var activeProxy = CORS_PROXIES[0];
-
 var HISTORY_KEY = 'video_site_history';
 var MAX_HISTORY = 50;
 var SAVE_INTERVAL = 5000;
 var PROGRESS_THRESHOLD = 5;
 
+// Slimmed-down category map: only the main sub-categories per group
 var CAT_MAP = {
-  '电影':   [1, 6, 7, 8, 9, 10, 11, 12, 39, 62, 70],
-  '电视剧': [2, 13, 14, 15, 16, 17, 18, 19, 23, 54, 55, 56, 57, 58, 59, 60, 64, 65, 66, 67, 68, 69],
-  '综艺':   [3, 25, 26, 27, 28, 47, 48, 49, 50, 52, 53],
-  '动漫':   [4, 29, 30, 31, 44, 45, 63]
+  '电影':   [6, 7, 8, 9, 10, 11, 12],
+  '电视剧': [13, 14, 15, 16, 17, 18, 19],
+  '综艺':   [3, 25, 26, 27, 28],
+  '动漫':   [4, 29, 30, 31]
 };
 
 var state = {
@@ -397,58 +390,65 @@ var state = {
 };
 
 // ===== API via CORS Proxy =====
+// Use multiple proxies, race them (first response wins = fastest)
 function showLoading(show) {
   document.getElementById('loadingBar').style.display = show ? 'block' : 'none';
 }
 
-function fetchWithTimeout(url, ms) {
-  ms = ms || 10000;
+function fetchJsonWithTimeout(url, ms) {
+  ms = ms || 8000;
   var ctrl = new AbortController();
   var timer = setTimeout(function() { ctrl.abort(); }, ms);
-  return fetch(url, { signal: ctrl.signal }).finally(function() { clearTimeout(timer); });
+  return fetch(url, { signal: ctrl.signal })
+    .then(function(r) {
+      clearTimeout(timer);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .catch(function(e) {
+      clearTimeout(timer);
+      throw e;
+    });
 }
 
-function fetchWithProxy(url, options) {
-  options = options || {};
-  var TIMEOUT = options.timeout || 12000;
-  return new Promise(function(resolve, reject) {
-    // Try each proxy in sequence
-    var tryProxy = function(idx) {
-      if (idx >= CORS_PROXIES.length) {
-        // All proxies failed, try direct fetch as last resort
-        console.log('[Fetch] All proxies failed, trying direct fetch...');
-        fetchWithTimeout(url, TIMEOUT)
-          .then(function(r) {
-            if (!r.ok) throw new Error('Direct HTTP ' + r.status);
-            return r.json();
-          })
-          .then(resolve)
-          .catch(function(e) {
-            console.error('[Fetch] Direct fetch also failed:', e.message);
-            reject(new Error('网络请求失败，请检查网络或稍后重试'));
+// Race: try direct + all proxies in parallel, return fastest success
+var CORS_PROXY_URLS = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url='
+];
+
+function fetchWithProxy(url) {
+  // Race direct fetch + proxies in parallel, first valid JSON wins
+  var attempts = [];
+  // Direct fetch (may work if API allows CORS or same-origin)
+  attempts.push(fetchJsonWithTimeout(url, 8000).catch(function() { return null; }));
+  // Proxy attempts
+  for (var i = 0; i < CORS_PROXY_URLS.length; i++) {
+    (function(p) {
+      attempts.push(
+        fetchJsonWithTimeout(p + encodeURIComponent(url), 8000).catch(function() { return null; })
+      );
+    })(CORS_PROXY_URLS[i]);
+  }
+  return Promise.race(attempts).then(function(result) {
+    if (result && result.code !== undefined) return result;
+    // If the fastest result was null (failed), wait for any success
+    return new Promise(function(resolve, reject) {
+      var settled = 0;
+      var remaining = attempts.length;
+      for (var j = 0; j < attempts.length; j++) {
+        (function(idx) {
+          attempts[idx].then(function(data) {
+            if (data && data.code !== undefined) resolve(data);
+            settled++;
+            if (settled >= remaining) reject(new Error('网络请求失败，请检查网络或稍后重试'));
+          }).catch(function() {
+            settled++;
+            if (settled >= remaining) reject(new Error('网络请求失败，请检查网络或稍后重试'));
           });
-        return;
+        })(j);
       }
-      var proxyUrl = CORS_PROXIES[idx] + encodeURIComponent(url);
-      console.log('[Fetch] Trying proxy #' + idx + ':', CORS_PROXIES[idx].split('/')[2]);
-      fetchWithTimeout(proxyUrl, TIMEOUT)
-        .then(function(r) {
-          if (!r.ok) throw new Error('Proxy #' + idx + ' HTTP ' + r.status);
-          return r.json();
-        })
-        .then(function(data) {
-          // Success: remember this working proxy
-          activeProxyIdx = idx;
-          activeProxy = CORS_PROXIES[idx];
-          console.log('[Fetch] Proxy #' + idx + ' succeeded');
-          resolve(data);
-        })
-        .catch(function(err) {
-          console.warn('[Fetch] Proxy #' + idx + ' failed:', err.message);
-          tryProxy(idx + 1);
-        });
-    };
-    tryProxy(0);
+    });
   });
 }
 
@@ -527,26 +527,11 @@ function apiHome(pg) {
   return fetchApi({ ac: 'videolist', pg: pg || 1, pagesize: 20 }).then(normalizeVideoList);
 }
 
-// Batch concurrent requests to avoid overloading
-function batchFetchAll(urls, batchSize) {
-  batchSize = batchSize || 3;
-  var results = [];
-  var idx = 0;
-  return new Promise(function(resolve, reject) {
-    function nextBatch() {
-      if (idx >= urls.length) { resolve(results); return; }
-      var slice = urls.slice(idx, idx + batchSize);
-      idx += batchSize;
-      Promise.all(slice.map(function(u) {
-        return fetchWithProxy(u).catch(function(e) { console.warn('[Batch] Failed:', e.message); return null; });
-      })).then(function(batchResults) {
-        results = results.concat(batchResults);
-        // Small delay between batches
-        setTimeout(nextBatch, 200);
-      }).catch(reject);
-    }
-    nextBatch();
-  });
+// Parallel fetch with error tolerance
+function fetchAllParallel(urls) {
+  return Promise.all(urls.map(function(u) {
+    return fetchWithProxy(u).catch(function(e) { console.warn('[Fetch] Failed:', e.message); return null; });
+  }));
 }
 
 function apiList(t, pg) {
@@ -558,7 +543,7 @@ function apiList(t, pg) {
       return Promise.resolve(state.catPageCache[cacheKey]);
     }
     var urls = subIds.map(function(id) { return buildApiUrl({ ac: 'videolist', t: id, pg: 1, pagesize: 10 }); });
-    return batchFetchAll(urls, 3).then(function(results) {
+    return fetchAllParallel(urls).then(function(results) {
       var all = [];
       var total = 0;
       for (var i = 0; i < results.length; i++) {
