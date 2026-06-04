@@ -1041,42 +1041,12 @@ function fallbackIframe(container, url) {
   stopProgressSave();
 }
 
-// ===== Block ads / popups =====
+// ===== Block popup ads =====
 (function blockAds() {
   // Override window.open to block popup ads
-  var _origOpen = window.open;
   window.open = function() {
-    console.log('[AdBlock] Blocked window.open:', arguments[0]);
+    console.log('[AdBlock] Blocked window.open');
     return null;
-  };
-  // Block top-level navigation from iframes via beforeunload guard
-  var detailOpened = false;
-  window.addEventListener('beforeunload', function(e) {
-    if (!detailOpened) {
-      // Only block if we're on the main site, not intentional navigation
-      // Allow normal navigation, just log
-    }
-  });
-  // Guard against iframe trying to redirect top
-  try {
-    Object.defineProperty(window, 'top', {
-      get: function() { return window; }
-    });
-  } catch(e) {}
-  // Block common ad networks via fetch interception (best-effort)
-  var adPatterns = ['ad.', 'ads.', 'pop.', 'popup', 'advert', 'doubleclick', 'googlesyndication'];
-  var _origFetch = window.fetch;
-  window.fetch = function(url) {
-    var u = url || '';
-    if (typeof u === 'string') {
-      for (var i = 0; i < adPatterns.length; i++) {
-        if (u.indexOf(adPatterns[i]) > -1) {
-          console.log('[AdBlock] Blocked fetch to:', u);
-          return Promise.reject(new Error('Blocked ad request'));
-        }
-      }
-    }
-    return _origFetch.apply(this, arguments);
   };
 })();
 
