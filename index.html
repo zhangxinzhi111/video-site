@@ -1395,6 +1395,21 @@ function goTools(el) {
     +'<button class="tool-btn" onclick="doSugKeywords()">拓展</button>'
     +'<div class="tool-result" id="sugResult"></div>'
     +'</div>'
+    // ICO favicon
+    +'<div class="tool-card">'
+    +'<h3><span class="icon">&#127760;</span> 网站图标获取</h3>'
+    +'<p>输入网址获取该网站的 favicon 图标</p>'
+    +'<input class="tool-input" id="icoInput" placeholder="输入网址，如 https://www.baidu.com">'
+    +'<button class="tool-btn" onclick="doGetIco()">获取</button>'
+    +'<div class="tool-result" id="icoResult" style="text-align:center"></div>'
+    +'</div>'
+    // Random video
+    +'<div class="tool-card">'
+    +'<h3><span class="icon">&#127916;</span> 随机视频</h3>'
+    +'<p>随机获取一段精彩短视频，每次都不一样</p>'
+    +'<button class="tool-btn" onclick="doRandomVideo()">换一个</button>'
+    +'<div class="tool-result" id="rvResult" style="text-align:center"></div>'
+    +'</div>'
     +'</div>';
   hero.after(div);
   loadHotSearch('短剧');
@@ -1555,12 +1570,48 @@ function doSugKeywords() {
     .catch(function(e) { res.innerHTML = '<p>拓展失败</p>'; });
 }
 
+// ===== ICO Favicon =====
+function doGetIco() {
+  var url = (document.getElementById('icoInput').value || '').trim();
+  if (!url) { showToast('请输入网址'); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  var res = document.getElementById('icoResult');
+  res.innerHTML = '<p style="color:var(--text-secondary)">获取中...</p>';
+  var icoUrl = KULEU_API + '/ico?url=' + encodeURIComponent(url);
+  var img = new Image();
+  img.onload = function() {
+    res.innerHTML = '<img src="'+icoUrl+'" style="width:64px;height:64px;border-radius:12px;background:#fff;padding:8px;margin-bottom:.5rem"><br>'
+      +'<a href="'+icoUrl+'" download="favicon.ico" style="font-size:.85rem;color:var(--primary)">下载图标</a>'
+      +'<br><span style="font-size:.8rem;color:var(--text-muted);margin-top:.3rem;display:block">'+esc(url)+'</span>';
+  };
+  img.onerror = function() { res.innerHTML = '<p>获取失败，请检查网址是否正确</p>'; };
+  img.src = icoUrl;
+}
+
+// ===== Random Video =====
+function doRandomVideo() {
+  var res = document.getElementById('rvResult');
+  res.innerHTML = '<p style="color:var(--text-secondary)">加载中...</p>';
+  fetch(KULEU_API + '/MP4_xiaojiejie?type=json')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.code == 200 && data.mp4_video) {
+        res.innerHTML = '<video src="'+esc(data.mp4_video)+'" controls autoplay loop playsinline style="width:100%;max-height:400px;border-radius:12px;background:#000"></video>'
+          +'<br><a href="'+esc(data.mp4_video)+'" target="_blank" download style="font-size:.85rem;color:var(--primary);margin-top:.5rem;display:inline-block">下载视频</a>';
+      } else {
+        res.innerHTML = '<p>加载失败</p>';
+      }
+    })
+    .catch(function(e) { res.innerHTML = '<p>加载失败: '+esc(e.message)+'</p>'; });
+}
+
 // Expose new functions
 window.goShortDrama=goShortDrama; window.goTools=goTools;
 window.dramaMode=dramaMode; window.doDramaSearch=doDramaSearch;
 window.loadHotSearch=loadHotSearch; window.doWatermark=doWatermark;
 window.doGenPwd=doGenPwd; window.doGenQR=doGenQR;
 window.loadHistoryToday=loadHistoryToday; window.doSugKeywords=doSugKeywords;
+window.doGetIco=doGetIco; window.doRandomVideo=doRandomVideo;
 
 // ===== Init =====
 renderFilterBar();
