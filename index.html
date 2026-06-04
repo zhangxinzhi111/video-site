@@ -16,6 +16,67 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg-dark);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
 
+/* ===== Short Drama ===== */
+.drama-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;padding:0 1rem}
+.drama-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;transition:all .2s}
+.drama-card:hover{background:var(--bg-card-hover);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.drama-card h3{font-size:.95rem;margin-bottom:.4rem;color:var(--text-primary)}
+.drama-card .time{font-size:.8rem;color:var(--text-muted)}
+.drama-card .link{display:inline-block;margin-top:.5rem;padding:.3rem .8rem;background:var(--gradient);color:#fff;border-radius:6px;font-size:.8rem;text-decoration:none}
+.drama-tabs{display:flex;gap:.5rem;padding:0 1rem;margin-bottom:1rem;flex-wrap:wrap}
+.drama-tab{padding:.4rem 1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;color:var(--text-secondary);cursor:pointer;font-size:.85rem;transition:all .2s}
+.drama-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.drama-search{display:flex;gap:.5rem;padding:0 1rem;margin-bottom:1rem;max-width:500px}
+.drama-search input{flex:1;padding:.5rem .8rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:.9rem}
+.drama-search input::placeholder{color:var(--text-muted)}
+.drama-search button{padding:.5rem 1rem;background:var(--gradient);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.85rem}
+
+/* ===== Toolbox ===== */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;padding:0 1rem}
+.tool-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:all .2s}
+.tool-card:hover{background:var(--bg-card-hover)}
+.tool-card h3{font-size:1.1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem}
+.tool-card h3 .icon{width:28px;height:28px;background:var(--gradient);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.tool-card p{color:var(--text-secondary);font-size:.85rem;margin-bottom:1rem}
+.tool-input{width:100%;padding:.6rem .8rem;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:.9rem;margin-bottom:.5rem;box-sizing:border-box}
+.tool-input::placeholder{color:var(--text-muted)}
+.tool-btn{padding:.5rem 1rem;background:var(--gradient);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;transition:opacity .2s}
+.tool-btn:hover{opacity:.85}
+.tool-btn:disabled{opacity:.5;cursor:not-allowed}
+.tool-result{margin-top:1rem;padding:1rem;background:var(--bg-dark);border:1px solid var(--border);border-radius:8px;min-height:60px;word-break:break-all;font-size:.9rem}
+.tool-result img{max-width:100%;border-radius:8px}
+.tool-result a{color:var(--primary);word-break:break-all}
+
+/* Password options */
+.pwd-opts{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.pwd-opt{display:flex;align-items:center;gap:.3rem;font-size:.85rem;color:var(--text-secondary)}
+.pwd-opt input{accent-color:var(--primary)}
+
+/* ===== Hot Search ===== */
+.hot-list{padding:0 1rem}
+.hot-item{display:flex;align-items:center;padding:.7rem .5rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.hot-item:hover{background:var(--bg-card)}
+.hot-rank{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:.8rem;font-weight:700;margin-right:.8rem;flex-shrink:0}
+.hot-rank.r1{background:#e74c3c;color:#fff}
+.hot-rank.r2{background:#e67e22;color:#fff}
+.hot-rank.r3{background:#f39c12;color:#fff}
+.hot-rank.rn{background:var(--bg-card);color:var(--text-muted)}
+.hot-title{flex:1;font-size:.9rem}
+.hot-hot{font-size:.75rem;color:var(--primary);background:rgba(231,76,60,.1);padding:.1rem .5rem;border-radius:10px;margin-left:.5rem}
+.hot-tabs{display:flex;gap:.4rem;padding:0 1rem;margin-bottom:.5rem;flex-wrap:wrap}
+.hot-tab{padding:.3rem .8rem;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;color:var(--text-secondary);cursor:pointer;font-size:.8rem}
+.hot-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ===== History Today ===== */
+.history-today{padding:0 1rem}
+.ht-item{padding:.7rem 0;border-bottom:1px solid var(--border)}
+.ht-date{font-size:.8rem;color:var(--primary);margin-bottom:.2rem}
+.ht-title{font-size:.9rem;color:var(--text-primary)}
+
+/* Error/empty state */
+.page-error{padding:2rem;text-align:center;color:var(--text-secondary)}
+.page-error svg{width:48px;height:48px;margin-bottom:.5rem;opacity:.5}
+
 /* ===== Header ===== */
 .header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,26,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 1rem;height:56px;display:flex;align-items:center;gap:.5rem}
 .logo{font-size:1.15rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;display:flex;align-items:center;gap:.3rem;flex-shrink:0;white-space:nowrap}
@@ -222,22 +283,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
   </div>
 
   <nav class="nav" id="mainNav">
-    <a href="javascript:void(0)" class="nav-home active" onclick="goCategory('',this);return false;">首页</a>
-    <a href="javascript:void(0)" class="nav-history" onclick="goHistory(this);return false;">历史</a>
-    <a href="javascript:void(0)" onclick="goCategory('电影',this);return false;">电影</a>
-    <a href="javascript:void(0)" onclick="goCategory('电视剧',this);return false;">电视剧</a>
-    <a href="javascript:void(0)" onclick="goCategory('动漫',this);return false;">动漫</a>
-    <a href="javascript:void(0)" onclick="goCategory('综艺',this);return false;">综艺</a>
+    <a href="javascript:void(0)" class="nav-home active" onclick="goHome()">首页</a>
+    <a href="javascript:void(0)" class="nav-history" onclick="goHistory(this)">历史</a>
+    <a href="javascript:void(0)" onclick="goShortDrama(this)">短剧</a>
+    <a href="javascript:void(0)" onclick="goCategory('电影',this)">电影</a>
+    <a href="javascript:void(0)" onclick="goCategory('电视剧',this)">电视剧</a>
+    <a href="javascript:void(0)" onclick="goCategory('动漫',this)">动漫</a>
+    <a href="javascript:void(0)" onclick="goCategory('综艺',this)">综艺</a>
+    <a href="javascript:void(0)" onclick="goTools(this)">工具</a>
     <a href="javascript:void(0)" class="nav-more" onclick="toggleNavDropdown(event)" style="display:none">更多 ▾</a>
   </nav>
 </header>
 
 <!-- Nav dropdown for mobile -->
 <div class="nav-dropdown" id="navDropdown">
-  <a href="javascript:void(0)" onclick="goCategory('电影',this);closeNavDropdown();return false;">电影</a>
-  <a href="javascript:void(0)" onclick="goCategory('电视剧',this);closeNavDropdown();return false;">电视剧</a>
-  <a href="javascript:void(0)" onclick="goCategory('动漫',this);closeNavDropdown();return false;">动漫</a>
-  <a href="javascript:void(0)" onclick="goCategory('综艺',this);closeNavDropdown();return false;">综艺</a>
+  <a href="javascript:void(0)" onclick="goShortDrama(this);closeNavDropdown()">短剧</a>
+  <a href="javascript:void(0)" onclick="goCategory('电影',this);closeNavDropdown()">电影</a>
+  <a href="javascript:void(0)" onclick="goCategory('电视剧',this);closeNavDropdown()">电视剧</a>
+  <a href="javascript:void(0)" onclick="goCategory('动漫',this);closeNavDropdown()">动漫</a>
+  <a href="javascript:void(0)" onclick="goCategory('综艺',this);closeNavDropdown()">综艺</a>
+  <a href="javascript:void(0)" onclick="goTools(this);closeNavDropdown()">工具</a>
 </div>
 
 <!-- Loading bar -->
@@ -1052,28 +1117,40 @@ function fallbackIframe(container, url) {
 
 // ===== Navigation =====
 function goHome() {
+  closeMobileSearch(); closeDetail();
+  var dp = document.getElementById('dramaPage'); if(dp) dp.remove();
+  var tp = document.getElementById('toolsPage'); if(tp) tp.remove();
+  var sec = document.querySelector('main .section'); if(sec) sec.style.display = '';
   state.page=1; state.filter=''; state.search=''; state.catPageCache={};
   document.getElementById('searchInput').value='';
   document.getElementById('heroTitle').innerHTML='海量影视 <em>免费在线看</em>';
   document.getElementById('heroDesc').textContent='收录电影、电视剧、动漫、综艺等海量资源，M3U8高清在线播放';
-  updateNav(''); closeDetail(); renderContinueSection(); loadData();
-  closeMobileSearch();
+  updateNav(''); renderContinueSection(); loadData();
 }
 function goHistory(el) {
+  closeMobileSearch(); closeDetail();
+  var dp = document.getElementById('dramaPage'); if(dp) dp.remove();
+  var tp = document.getElementById('toolsPage'); if(tp) tp.remove();
+  var sec = document.querySelector('main .section'); if(sec) sec.style.display = '';
   state.page=1; state.filter='__history__'; state.search='';
   document.getElementById('searchInput').value='';
   document.getElementById('heroTitle').innerHTML='播放 <em>历史记录</em>';
   document.getElementById('heroDesc').textContent='继续观看上次未看完的视频';
-  updateNav('__history__'); closeDetail(); renderContinueSection(); loadData(); window.scrollTo(0,0);
-  closeMobileSearch();
+  updateNav('__history__'); renderContinueSection(); loadData(); window.scrollTo(0,0);
+  if (el) return false;
 }
 function goCategory(cat) {
+  closeMobileSearch(); closeNavDropdown(); closeDetail();
+  // Hide drama/tools pages if visible
+  var dp = document.getElementById('dramaPage'); if(dp) dp.remove();
+  var tp = document.getElementById('toolsPage'); if(tp) tp.remove();
+  var sec = document.querySelector('main .section'); if(sec) sec.style.display = '';
   state.page=1; state.filter=cat; state.search=''; state.catPageCache={};
   document.getElementById('searchInput').value='';
   document.getElementById('heroTitle').textContent=cat||'全部影视';
   document.getElementById('heroDesc').textContent='最新'+(cat||'影视')+'资源推荐';
-  updateNav(cat); closeDetail(); renderContinueSection(); loadData(); window.scrollTo(0,0);
-  closeMobileSearch();
+  updateNav(cat); renderContinueSection(); loadData(); window.scrollTo(0,0);
+  if (typeof arguments[1] === 'undefined') return false;
 }
 function filterBy(id) {
   state.page=1; state.filter=id; state.search=''; state.catPageCache={};
@@ -1105,8 +1182,12 @@ function updateNav(cat) {
   document.querySelectorAll('#mainNav a').forEach(function(a) {
     var onclick = a.getAttribute('onclick') || '';
     var isHistory = onclick.indexOf('goHistory') > -1;
+    var isDrama = onclick.indexOf('goShortDrama') > -1;
+    var isTools = onclick.indexOf('goTools') > -1;
     var isActive = false;
     if (isHistory) isActive = (cat === '__history__');
+    else if (isDrama) isActive = (cat === '__drama__');
+    else if (isTools) isActive = (cat === '__tools__');
     else if (cat === '') isActive = a.textContent.trim() === '首页';
     else isActive = onclick.indexOf("'"+cat+"'") > -1;
     a.classList.toggle('active', isActive);
@@ -1117,6 +1198,369 @@ function showToast(msg) {
   var t = document.createElement('div'); t.className='toast'; t.textContent=msg;
   document.body.appendChild(t); setTimeout(function(){t.remove();}, 2000);
 }
+
+// ===== Short Drama Page =====
+var KULEU_API = 'https://api.kuleu.com/api';
+var dramaState = { mode: 'list' }; // list | today | search
+
+function goShortDrama(el) {
+  closeMobileSearch(); closeNavDropdown(); closeDetail();
+  state.filter = '__drama__'; state.search = '';
+  document.getElementById('heroTitle').textContent = '短剧资源';
+  document.getElementById('heroDesc').textContent = '全网夸克短剧，每日更新';
+  updateNav('__drama__');
+  document.getElementById('continueSection').classList.add('hidden');
+  var main = document.getElementById('mainContent');
+  var hero = main.querySelector('.hero');
+  var sec = main.querySelector('.section');
+  sec.style.display = 'none';
+  // Replace content after hero with drama UI
+  var oldDrama = document.getElementById('dramaPage');
+  if (oldDrama) oldDrama.remove();
+  var div = document.createElement('div');
+  div.id = 'dramaPage';
+  div.innerHTML =
+    '<div class="drama-tabs">'
+    +'<div class="drama-tab active" onclick="dramaMode(\'list\',this)">全部短剧</div>'
+    +'<div class="drama-tab" onclick="dramaMode(\'today\',this)">今日更新</div>'
+    +'<div class="drama-tab" onclick="dramaMode(\'search\',this)">搜索短剧</div>'
+    +'</div>'
+    +'<div class="drama-search" id="dramaSearch" style="display:none">'
+    +'<input id="dramaSearchInput" placeholder="输入短剧名称..." onkeydown="if(event.key===\'Enter\')doDramaSearch()">'
+    +'<button onclick="doDramaSearch()">搜索</button>'
+    +'</div>'
+    +'<div class="drama-grid" id="dramaGrid"><div class="video-card"><div class="poster skeleton"></div></div><div class="video-card"><div class="poster skeleton"></div></div><div class="video-card"><div class="poster skeleton"></div></div></div>';
+  hero.after(div);
+  dramaState.mode = 'list';
+  loadDramaList();
+  window.scrollTo(0, 0);
+  if (el) return false;
+}
+
+function dramaMode(mode, el) {
+  document.querySelectorAll('.drama-tab').forEach(function(t){t.classList.remove('active');});
+  if (el) el.classList.add('active');
+  dramaState.mode = mode;
+  var searchBox = document.getElementById('dramaSearch');
+  searchBox.style.display = mode === 'search' ? 'flex' : 'none';
+  if (mode === 'search') {
+    document.getElementById('dramaGrid').innerHTML = '<div class="empty" style="grid-column:1/-1"><p>请输入短剧名称搜索</p></div>';
+  } else if (mode === 'list') {
+    loadDramaList();
+  } else {
+    loadDramaToday();
+  }
+}
+
+function loadDramaList() {
+  var grid = document.getElementById('dramaGrid');
+  grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p style="color:var(--text-secondary)">加载中...</p></div>';
+  fetch(KULEU_API + '/action?list')
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      if (res.code === 200 && res.data && res.data.length) {
+        renderDramaGrid(res.data);
+      } else {
+        grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>暂无数据</p></div>';
+      }
+    })
+    .catch(function(e) {
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>加载失败: '+esc(e.message)+'</p></div>';
+    });
+}
+
+function loadDramaToday() {
+  var grid = document.getElementById('dramaGrid');
+  grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p style="color:var(--text-secondary)">加载中...</p></div>';
+  fetch(KULEU_API + '/action?today')
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      if (res.code === 200 && res.data && res.data.length) {
+        renderDramaGrid(res.data);
+      } else {
+        grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>今日暂无更新</p></div>';
+      }
+    })
+    .catch(function(e) {
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>加载失败: '+esc(e.message)+'</p></div>';
+    });
+}
+
+function doDramaSearch() {
+  var text = (document.getElementById('dramaSearchInput').value || '').trim();
+  if (!text) return;
+  var grid = document.getElementById('dramaGrid');
+  grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p style="color:var(--text-secondary)">搜索中...</p></div>';
+  fetch(KULEU_API + '/action?text=' + encodeURIComponent(text))
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      if (res.code === 200 && res.data && res.data.length) {
+        renderDramaGrid(res.data);
+      } else {
+        grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>未找到相关短剧</p></div>';
+      }
+    })
+    .catch(function(e) {
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>搜索失败</p></div>';
+    });
+}
+
+function renderDramaGrid(data) {
+  var grid = document.getElementById('dramaGrid');
+  grid.innerHTML = data.map(function(item) {
+    return '<div class="drama-card">'
+      +'<h3>'+esc(item.name)+'</h3>'
+      +'<div class="time">添加时间: '+esc(item.addtime || '未知')+'</div>'
+      +(item.viewlink ? '<a class="link" href="'+esc(item.viewlink)+'" target="_blank" rel="noopener">夸克网盘观看</a>' : '')
+      +'</div>';
+  }).join('');
+}
+
+// ===== Tools Page =====
+var hotTagState = '短剧';
+
+function goTools(el) {
+  closeMobileSearch(); closeNavDropdown(); closeDetail();
+  state.filter = '__tools__'; state.search = '';
+  document.getElementById('heroTitle').textContent = '实用工具箱';
+  document.getElementById('heroDesc').textContent = '短视频去水印 · 密码生成 · 二维码 · 热搜';
+  updateNav('__tools__');
+  document.getElementById('continueSection').classList.add('hidden');
+  var main = document.getElementById('mainContent');
+  var sec = main.querySelector('.section');
+  sec.style.display = 'none';
+  var hero = main.querySelector('.hero');
+  var old = document.getElementById('toolsPage');
+  if (old) old.remove();
+  var div = document.createElement('div');
+  div.id = 'toolsPage';
+  div.innerHTML =
+    // Hot Search
+    '<div style="padding:1rem 1rem 0"><h2 style="font-size:1.1rem;margin-bottom:.5rem">夸克热搜</h2></div>'
+    +'<div class="hot-tabs" id="hotTabs">'
+    +'<div class="hot-tab active" onclick="loadHotSearch(\'短剧\',this)">短剧</div>'
+    +'<div class="hot-tab" onclick="loadHotSearch(\'电影\',this)">电影</div>'
+    +'<div class="hot-tab" onclick="loadHotSearch(\'电视剧\',this)">电视剧</div>'
+    +'<div class="hot-tab" onclick="loadHotSearch(\'综艺\',this)">综艺</div>'
+    +'</div>'
+    +'<div class="hot-list" id="hotList"><div class="empty"><p>加载中...</p></div></div>'
+    // Tools grid
+    +'<div style="padding:1.5rem 1rem 0"><h2 style="font-size:1.1rem;margin-bottom:.5rem">工具</h2></div>'
+    +'<div class="tools-grid">'
+    // Watermark remover
+    +'<div class="tool-card">'
+    +'<h3><span class="icon">&#127909;</span> 短视频去水印</h3>'
+    +'<p>支持抖音、快手、小红书等全平台视频/图文去水印</p>'
+    +'<input class="tool-input" id="wmInput" placeholder="粘贴视频分享链接...">'
+    +'<button class="tool-btn" onclick="doWatermark()">解析</button>'
+    +'<div class="tool-result" id="wmResult"></div>'
+    +'</div>'
+    // Password generator
+    +'<div class="tool-card">'
+    +'<h3><span class="icon">&#128272;</span> 随机密码生成</h3>'
+    +'<p>生成高强度随机密码</p>'
+    +'<div class="pwd-opts">'
+    +'<label class="pwd-opt"><input type="checkbox" id="pwdLower" checked> 小写</label>'
+    +'<label class="pwd-opt"><input type="checkbox" id="pwdUpper" checked> 大写</label>'
+    +'<label class="pwd-opt"><input type="checkbox" id="pwdNum" checked> 数字</label>'
+    +'<label class="pwd-opt"><input type="checkbox" id="pwdSym" checked> 符号</label>'
+    +'</div>'
+    +'<div style="display:flex;gap:.5rem;margin-bottom:.5rem">'
+    +'<input class="tool-input" id="pwdLen" type="number" value="16" min="4" max="64" style="width:80px;flex:none" placeholder="长度">'
+    +'<input class="tool-input" id="pwdCount" type="number" value="5" min="1" max="20" style="width:60px;flex:none" placeholder="数量">'
+    +'</div>'
+    +'<button class="tool-btn" onclick="doGenPwd()">生成</button>'
+    +'<div class="tool-result" id="pwdResult" style="white-space:pre-wrap"></div>'
+    +'</div>'
+    // QR Code
+    +'<div class="tool-card">'
+    +'<h3><span class="icon">&#128243;</span> 二维码生成</h3>'
+    +'<p>将链接或文字生成二维码</p>'
+    +'<input class="tool-input" id="qrInput" placeholder="输入链接或文字..." value="https://zhangxinzhi111.github.io/video-site/">'
+    +'<button class="tool-btn" onclick="doGenQR()">生成二维码</button>'
+    +'<div class="tool-result" id="qrResult" style="text-align:center"></div>'
+    +'</div>'
+    // History Today
+    +'<div class="tool-card">'
+    +'<h3><span class="icon">&#128197;</span> 历史上的今天</h3>'
+    +'<p>回顾历史上今天发生的大事</p>'
+    +'<button class="tool-btn" onclick="loadHistoryToday()">查看</button>'
+    +'<div class="tool-result" id="htResult"><div class="empty"><p>点击查看</p></div></div>'
+    +'</div>'
+    // Expand keywords
+    +'<div class="tool-card">'
+    +'<h3><span class="icon">&#128269;</span> 拓展热词</h3>'
+    +'<p>根据关键词拓展相关热门搜索词</p>'
+    +'<input class="tool-input" id="sugInput" placeholder="输入关键词...">'
+    +'<button class="tool-btn" onclick="doSugKeywords()">拓展</button>'
+    +'<div class="tool-result" id="sugResult"></div>'
+    +'</div>'
+    +'</div>';
+  hero.after(div);
+  loadHotSearch('短剧');
+  window.scrollTo(0, 0);
+  if (el) return false;
+}
+
+// ===== Hot Search =====
+function loadHotSearch(tag, el) {
+  hotTagState = tag;
+  document.querySelectorAll('.hot-tab').forEach(function(t){t.classList.remove('active');});
+  if (el) el.classList.add('active');
+  var list = document.getElementById('hotList');
+  list.innerHTML = '<div class="empty"><p>加载中...</p></div>';
+  fetch(KULEU_API + '/vtquark?tag=' + encodeURIComponent(tag))
+    .then(function(r){ return r.json(); })
+    .then(function(res) {
+      if (res.code === 200 && res.data && res.data.length) {
+        list.innerHTML = res.data.map(function(item, i) {
+          var rc = i < 1 ? 'r1' : i < 2 ? 'r2' : i < 3 ? 'r3' : 'rn';
+          return '<div class="hot-item">'
+            +'<span class="hot-rank '+rc+'">'+(i+1)+'</span>'
+            +'<span class="hot-title">'+esc(item.title || item.name || '未知')+'</span>'
+            +(item.hot ? '<span class="hot-hot">'+esc(item.hot)+'</span>' : '')
+            +'</div>';
+        }).join('');
+      } else {
+        list.innerHTML = '<div class="empty"><p>暂无热搜数据</p></div>';
+      }
+    })
+    .catch(function(e) {
+      list.innerHTML = '<div class="empty"><p>加载失败</p></div>';
+    });
+}
+
+// ===== Watermark Remover =====
+function doWatermark() {
+  var url = (document.getElementById('wmInput').value || '').trim();
+  if (!url) { showToast('请输入视频链接'); return; }
+  var res = document.getElementById('wmResult');
+  res.innerHTML = '<p style="color:var(--text-secondary)">解析中...</p>';
+  fetch(KULEU_API + '/jiexi?url=' + encodeURIComponent(url))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.code === 200 && data.data) {
+        var d = data.data;
+        var html = '<div style="margin-bottom:.5rem">';
+        if (d.cover) html += '<img src="'+esc(d.cover)+'" style="max-width:200px;border-radius:8px;margin-bottom:.5rem">';
+        html += '<strong>'+esc(d.title||'')+'</strong>';
+        if (d.author && d.author.name) html += '<br><span style="color:var(--text-secondary);font-size:.85rem">@'+esc(d.author.name)+'</span>';
+        html += '</div>';
+        if (d.url) html += '<a href="'+esc(d.url)+'" target="_blank" download>下载无水印视频</a>';
+        if (d.music && d.music.url) html += '<br><a href="'+esc(d.music.url)+'" target="_blank">下载背景音乐</a>';
+        if (d.images && d.images.length) {
+          html += '<div style="margin-top:.5rem">';
+          d.images.forEach(function(img) { html += '<img src="'+esc(img)+'" style="max-width:150px;margin:.2rem;border-radius:4px">'; });
+          html += '</div>';
+        }
+        res.innerHTML = html || '<p>解析成功但无可用内容</p>';
+      } else {
+        res.innerHTML = '<p>解析失败: '+(data.msg||'未知错误')+'</p>';
+      }
+    })
+    .catch(function(e) {
+      res.innerHTML = '<p>解析失败: '+esc(e.message)+'</p>';
+    });
+}
+
+// ===== Password Generator =====
+function doGenPwd() {
+  var opts = {
+    ss_xx: document.getElementById('pwdLower').checked ? '1' : '0',
+    ss_dx: document.getElementById('pwdUpper').checked ? '1' : '0',
+    ss_sz: document.getElementById('pwdNum').checked ? '1' : '0',
+    ss_fh: document.getElementById('pwdSym').checked ? '1' : '0',
+    ss_cd: Math.max(4, Math.min(64, parseInt(document.getElementById('pwdLen').value)||16)),
+    ss_sl: Math.max(1, Math.min(20, parseInt(document.getElementById('pwdCount').value)||5))
+  };
+  if (opts.ss_xx==='0' && opts.ss_dx==='0' && opts.ss_sz==='0' && opts.ss_fh==='0') {
+    showToast('请至少选择一种字符类型'); return;
+  }
+  var params = Object.keys(opts).map(function(k){return k+'='+opts[k];}).join('&');
+  var res = document.getElementById('pwdResult');
+  res.innerHTML = '<p style="color:var(--text-secondary)">生成中...</p>';
+  fetch(KULEU_API + '/suijimima?' + params)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.code === 200 && data.data && data.data.password_box) {
+        res.innerHTML = data.data.password_box.map(function(pw) {
+          return '<div style="padding:.3rem .5rem;background:var(--bg-card);border-radius:4px;margin-bottom:.3rem;cursor:pointer;font-family:monospace" onclick="navigator.clipboard.writeText(\''+pw.replace(/'/g,"\\'")+'\');showToast(\'已复制\')">'+esc(pw)+'</div>';
+        }).join('');
+      } else {
+        res.innerHTML = '<p>生成失败</p>';
+      }
+    })
+    .catch(function(e) { res.innerHTML = '<p>生成失败</p>'; });
+}
+
+// ===== QR Code Generator =====
+function doGenQR() {
+  var text = (document.getElementById('qrInput').value || '').trim();
+  if (!text) { showToast('请输入内容'); return; }
+  var res = document.getElementById('qrResult');
+  res.innerHTML = '<p style="color:var(--text-secondary)">生成中...</p>';
+  var img = new Image();
+  img.onload = function() {
+    res.innerHTML = '';
+    img.style.maxWidth = '200px';
+    img.style.borderRadius = '8px';
+    res.appendChild(img);
+    res.innerHTML += '<br><a href="'+img.src+'" download="qrcode.png" style="font-size:.85rem;margin-top:.5rem;display:inline-block">下载二维码</a>';
+  };
+  img.onerror = function() { res.innerHTML = '<p>生成失败</p>'; };
+  img.src = KULEU_API + '/qrcode?text=' + encodeURIComponent(text) + '&size=200&frame=1&e=L';
+}
+
+// ===== History Today =====
+function loadHistoryToday() {
+  var res = document.getElementById('htResult');
+  res.innerHTML = '<p style="color:var(--text-secondary)">加载中...</p>';
+  fetch(KULEU_API + '/lsjt')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.code === 200 && data.result) {
+        res.innerHTML = '<div class="history-today" style="padding:0">'
+          +'<div style="margin-bottom:.5rem;color:var(--primary);font-size:.85rem">'+esc(data.day||'')+'</div>'
+          + data.result.map(function(item) {
+            return '<div class="ht-item">'
+              +'<div class="ht-date">'+esc(item.date||'')+'</div>'
+              +'<div class="ht-title">'+esc(item.title||'')+'</div>'
+              +'</div>';
+          }).join('')
+          +'</div>';
+      } else {
+        res.innerHTML = '<p>加载失败</p>';
+      }
+    })
+    .catch(function(e) { res.innerHTML = '<p>加载失败</p>'; });
+}
+
+// ===== Expand Keywords =====
+function doSugKeywords() {
+  var name = (document.getElementById('sugInput').value || '').trim();
+  if (!name) { showToast('请输入关键词'); return; }
+  var res = document.getElementById('sugResult');
+  res.innerHTML = '<p style="color:var(--text-secondary)">拓展中...</p>';
+  fetch(KULEU_API + '/sug?name=' + encodeURIComponent(name))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (data.code === 200 && data.data && data.data.list) {
+        res.innerHTML = data.data.list.map(function(item) {
+          return '<span style="display:inline-block;padding:.2rem .6rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;margin:.2rem;font-size:.85rem;cursor:pointer" onclick="document.getElementById(\'searchInput\').value=\''+esc(item.name).replace(/'/g,"\\'")+'\';goHome();doSearch()">'+esc(item.name)+'</span>';
+        }).join('');
+      } else {
+        res.innerHTML = '<p>无拓展结果</p>';
+      }
+    })
+    .catch(function(e) { res.innerHTML = '<p>拓展失败</p>'; });
+}
+
+// Expose new functions
+window.goShortDrama=goShortDrama; window.goTools=goTools;
+window.dramaMode=dramaMode; window.doDramaSearch=doDramaSearch;
+window.loadHotSearch=loadHotSearch; window.doWatermark=doWatermark;
+window.doGenPwd=doGenPwd; window.doGenQR=doGenQR;
+window.loadHistoryToday=loadHistoryToday; window.doSugKeywords=doSugKeywords;
 
 // ===== Init =====
 renderFilterBar();
