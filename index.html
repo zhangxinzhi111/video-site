@@ -507,44 +507,46 @@ function fetchJsonWithTimeout(url, ms) {
     });
 }
 
-// Race: try direct + all proxies in parallel, return fastest success
-var CORS_PROXY_URLS = [
-  'https://corsproxy.io/?',
+// Sequential proxy fallback: codetabs (most reliable) -> allorigins -> direct
+var CORS_PROXIES = [
+  'https://api.codetabs.com/v1/proxy/?quest=',
   'https://api.allorigins.win/raw?url='
 ];
 
 function fetchWithProxy(url) {
-  // Race direct fetch + proxies in parallel, first valid JSON wins
-  var attempts = [];
-  // Direct fetch (may work if API allows CORS or same-origin)
-  attempts.push(fetchJsonWithTimeout(url, 8000).catch(function() { return null; }));
-  // Proxy attempts
-  for (var i = 0; i < CORS_PROXY_URLS.length; i++) {
-    (function(p) {
-      attempts.push(
-        fetchJsonWithTimeout(p + encodeURIComponent(url), 8000).catch(function() { return null; })
-      );
-    })(CORS_PROXY_URLS[i]);
-  }
-  return Promise.race(attempts).then(function(result) {
-    if (result && result.code !== undefined) return result;
-    // If the fastest result was null (failed), wait for any success
-    return new Promise(function(resolve, reject) {
-      var settled = 0;
-      var remaining = attempts.length;
-      for (var j = 0; j < attempts.length; j++) {
-        (function(idx) {
-          attempts[idx].then(function(data) {
-            if (data && data.code !== undefined) resolve(data);
-            settled++;
-            if (settled >= remaining) reject(new Error('网络请求失败，请检查网络或稍后重试'));
-          }).catch(function() {
-            settled++;
-            if (settled >= remaining) reject(new Error('网络请求失败，请检查网络或稍后重试'));
+  return new Promise(function(resolve, reject) {
+    var idx = 0;
+    function tryNext() {
+      if (idx >= CORS_PROXIES.length) {
+        // All proxies failed, try direct as last resort
+        fetchJsonWithTimeout(url, 8000)
+          .then(resolve)
+          .catch(function(e) {
+            console.error('[API] All proxies + direct failed for:', url);
+            reject(new Error('网络请求失败，请检查网络或稍后重试'));
           });
-        })(j);
+        return;
       }
-    });
+      var proxyUrl = CORS_PROXIES[idx] + encodeURIComponent(url);
+      console.log('[API] Trying proxy #' + idx + ':', CORS_PROXIES[idx].split('/')[2]);
+      fetchJsonWithTimeout(proxyUrl, 12000)
+        .then(function(data) {
+          if (data && data.code !== undefined) {
+            console.log('[API] Proxy #' + idx + ' succeeded');
+            resolve(data);
+          } else {
+            // Bad response format, try next
+            idx++;
+            tryNext();
+          }
+        })
+        .catch(function(err) {
+          console.warn('[API] Proxy #' + idx + ' failed:', err.message);
+          idx++;
+          tryNext();
+        });
+    }
+    tryNext();
   });
 }
 
@@ -1191,6 +1193,7 @@ function goCategory(cat) {
 function filterBy(id) {
   state.page=1; state.filter=id; state.search=''; state.catPageCache={};
   document.getElementById('heroTitle').textContent=id||'全部影视';
+  updateNav(id);
   renderFilterBar(); renderContinueSection(); loadData(); window.scrollTo(0,0);
   closeMobileSearch();
 }
