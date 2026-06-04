@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>影视资源站 - 在线观看</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#127909;</text></svg>">
+<style>
+:root {
+  --primary:#e74c3c; --primary-dark:#c0392b;
+  --bg-dark:#0a0a1a; --bg-card:#141428; --bg-card-hover:#1a1a3a;
+  --text-primary:#fff; --text-secondary:#8892b0; --text-muted:#4a5568;
+  --border:#2d2d5e; --accent-gold:#f0c040;
+  --gradient:linear-gradient(135deg,#e74c3c 0%,#8e44ad 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg-dark);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+.header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,26,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.logo{font-size:1.5rem;font-weight:800;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.logo svg{width:28px;height:28px}
+.search-box{display:flex;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;width:400px;max-width:40vw;transition:border-color .3s}
+.search-box:focus-within{border-color:var(--primary)}
+.search-box input{flex:1;padding:.6rem 1rem;background:transparent;border:none;outline:none;color:var(--text-primary);font-size:.95rem}
+.search-box input::placeholder{color:var(--text-muted)}
+.search-box button{padding:.6rem 1.2rem;background:var(--primary);border:none;color:#fff;cursor:pointer;font-size:.9rem;transition:background .3s;flex-shrink:0}
+.search-box button:hover{background:var(--primary-dark)}
+.nav{display:flex;gap:.3rem;align-items:center;flex-shrink:0}
+.nav a{padding:.4rem .7rem;border-radius:6px;color:var(--text-secondary);text-decoration:none;font-size:.85rem;cursor:pointer;transition:all .3s;white-space:nowrap}
+.nav a:hover,.nav a.active{color:var(--text-primary);background:rgba(255,255,255,.08)}
+.main{padding-top:64px}
+.hero{position:relative;height:280px;overflow:hidden;background:linear-gradient(135deg,#1a0533 0%,#0a0a2a 50%,#0a1a2a 100%)}
+.hero-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:2rem;height:100%;display:flex;flex-direction:column;justify-content:center}
+.hero h1{font-size:2rem;font-weight:700;margin-bottom:.4rem}
+.hero h1 em{font-style:normal;color:var(--primary)}
+.hero p{color:var(--text-secondary);font-size:.95rem;max-width:500px;line-height:1.6}
+.section{max-width:1200px;margin:0 auto;padding:1.5rem 2rem}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.section-title{font-size:1.2rem;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.section-title::before{content:'';width:4px;height:20px;background:var(--primary);border-radius:2px}
+.section-clear{color:var(--text-muted);font-size:.8rem;cursor:pointer;border:none;background:none;padding:.2rem .5rem;border-radius:4px;transition:all .3s}
+.section-clear:hover{color:var(--primary);background:rgba(255,255,255,.05)}
+.video-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem}
+.video-card{background:var(--bg-card);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .3s;border:1px solid transparent}
+.video-card:hover{transform:translateY(-4px);border-color:var(--border);background:var(--bg-card-hover)}
+.video-card .poster{position:relative;width:100%;padding-top:140%;overflow:hidden;background:var(--border)}
+.video-card .poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.video-card:hover .poster img{transform:scale(1.05)}
+.video-card .badge{position:absolute;top:8px;left:8px;background:var(--primary);color:#fff;padding:2px 6px;border-radius:4px;font-size:.7rem;font-weight:600}
+.video-card .note{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);color:var(--accent-gold);padding:2px 6px;border-radius:4px;font-size:.7rem}
+.video-card .info{padding:.6rem .8rem}
+.video-card .info h3{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.25rem}
+.video-card .info .meta{display:flex;gap:.5rem;color:var(--text-muted);font-size:.72rem}
+.history-card .poster .progress-bar{position:absolute;bottom:0;left:0;height:3px;background:var(--primary);border-radius:0 2px 0 0;transition:width .3s}
+.history-card .poster .play-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(231,76,60,.85);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+.history-card:hover .poster .play-icon{opacity:1}
+.history-card .info .ep-info{color:var(--primary);font-size:.72rem;font-weight:600;margin-top:.15rem}
+.history-card .info .time-info{color:var(--text-muted);font-size:.68rem;margin-top:.1rem}
+.filter-bar{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.filter-tag{padding:.35rem .8rem;border-radius:6px;background:var(--bg-card);color:var(--text-secondary);font-size:.85rem;cursor:pointer;border:1px solid transparent;transition:all .3s}
+.filter-tag:hover{color:var(--text-primary);border-color:var(--border)}
+.filter-tag.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.pagination{display:flex;justify-content:center;align-items:center;gap:.5rem;margin-top:2rem;padding:1rem 0}
+.pagination button{padding:.5rem 1rem;border-radius:6px;background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:.85rem;transition:all .3s}
+.pagination button:hover{border-color:var(--primary);color:var(--primary)}
+.pagination button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.pagination button:disabled{opacity:.4;cursor:not-allowed}
+.continue-section{max-width:1200px;margin:0 auto;padding:0 2rem 1.5rem}
+.continue-section.hidden{display:none}
+.detail-overlay{position:fixed;inset:0;z-index:200;background:var(--bg-dark);overflow-y:auto;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.detail-header{position:relative;min-height:320px}
+.detail-header-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(40px) brightness(.25)}
+.detail-header-content{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:2rem;min-height:320px;display:flex;gap:2rem;align-items:center}
+.detail-poster{width:180px;height:260px;border-radius:10px;overflow:hidden;flex-shrink:0;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.detail-poster img{width:100%;height:100%;object-fit:cover}
+.detail-info{flex:1}
+.detail-info h1{font-size:1.8rem;font-weight:700;margin-bottom:.5rem}
+.detail-info .tags{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.detail-info .tags span{padding:.2rem .6rem;border-radius:4px;background:rgba(255,255,255,.1);font-size:.8rem;color:var(--text-secondary)}
+.detail-info .desc{color:var(--text-secondary);font-size:.9rem;line-height:1.7;max-height:90px;overflow:hidden}
+.detail-resume{display:inline-flex;align-items:center;gap:.5rem;margin-top:.8rem;padding:.5rem 1.2rem;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600;transition:background .3s}
+.detail-resume:hover{background:var(--primary-dark)}
+.detail-resume.hidden{display:none}
+.detail-resume svg{width:16px;height:16px}
+.player-section{max-width:1200px;margin:0 auto;padding:1.5rem 2rem}
+.player-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:10px;overflow:hidden;margin-bottom:1.5rem}
+.player-container video,.player-container iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.episode-list{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 0}
+.episode-btn{padding:.5rem 1rem;border-radius:6px;background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;font-size:.85rem;transition:all .3s;min-width:60px;text-align:center}
+.episode-btn:hover{border-color:var(--primary);color:var(--primary)}
+.episode-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.back-btn{position:fixed;top:80px;left:2rem;z-index:210;width:40px;height:40px;border-radius:50%;background:rgba(10,10,26,.85);border:1px solid var(--border);color:var(--text-primary);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:1.2rem}
+.back-btn:hover{background:var(--primary);border-color:var(--primary)}
+.empty{text-align:center;padding:4rem 2rem;color:var(--text-muted)}
+.empty p{margin-top:1rem;font-size:.95rem}
+.footer{text-align:center;padding:2rem;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg-dark)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.skeleton{background:linear-gradient(90deg,var(--bg-card) 25%,var(--bg-card-hover) 50%,var(--bg-card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(231,76,60,.95);color:#fff;padding:.6rem 1.5rem;border-radius:8px;font-size:.9rem;z-index:999;animation:toastIn .3s}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+.loading-bar{position:fixed;top:64px;left:0;right:0;height:3px;z-index:150;background:var(--border)}
+.loading-bar .bar{height:100%;background:var(--gradient);width:0;animation:loadBar 1.5s ease-in-out infinite}
+@keyframes loadBar{0%{width:0;margin-left:0}50%{width:60%}100%{width:0;margin-left:100%}}
+@media(max-width:1200px){.video-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.video-grid{grid-template-columns:repeat(3,1fr)}.search-box{width:200px;max-width:30vw}.nav a{font-size:.8rem;padding:.3rem .5rem}.detail-header-content{flex-direction:column;text-align:center}.detail-info .tags{justify-content:center}}
+@media(max-width:600px){.video-grid{grid-template-columns:repeat(2,1fr);gap:.6rem}.header{padding:0 1rem}.section,.continue-section{padding-left:1rem;padding-right:1rem}.search-box{width:150px}.hero{height:200px}.hero h1{font-size:1.4rem}.detail-header{min-height:auto}.detail-header-content{flex-direction:column;padding:1rem;min-height:auto}.detail-poster{width:130px;height:190px}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo" onclick="goHome()">
+    <svg viewBox="0 0 28 28" fill="none"><rect x="1" y="5" width="26" height="18" rx="3" stroke="url(#lg)" stroke-width="2"/><polygon points="11,9 11,19 20,14" fill="url(#lg)"/><defs><linearGradient id="lg" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#e74c3c"/><stop offset="1" stop-color="#8e44ad"/></linearGradient></defs></svg>
+    影视资源站
+  </div>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索影视资源..." onkeydown="if(event.key==='Enter')doSearch()">
+    <button onclick="doSearch()">&#128269;</button>
+  </div>
+  <nav class="nav" id="mainNav">
+    <a href="javascript:void(0)" class="active" onclick="goCategory('',this);return false;">首页</a>
+    <a href="javascript:void(0)" onclick="goHistory(this);return false;">历史</a>
+    <a href="javascript:void(0)" onclick="goCategory('电影',this);return false;">电影</a>
+    <a href="javascript:void(0)" onclick="goCategory('电视剧',this);return false;">电视剧</a>
+    <a href="javascript:void(0)" onclick="goCategory('动漫',this);return false;">动漫</a>
+    <a href="javascript:void(0)" onclick="goCategory('综艺',this);return false;">综艺</a>
+  </nav>
+</header>
+
+<!-- Loading bar -->
+<div class="loading-bar" id="loadingBar" style="display:none"><div class="bar"></div></div>
+
+<main class="main" id="mainContent">
+  <div class="hero">
+    <div class="hero-content">
+      <h1 id="heroTitle">海量影视 <em>免费在线看</em></h1>
+      <p id="heroDesc">收录电影、电视剧、动漫、综艺等海量资源，M3U8高清在线播放</p>
+    </div>
+  </div>
+
+  <div class="continue-section hidden" id="continueSection">
+    <div class="section-header">
+      <div class="section-title">继续观看</div>
+      <button class="section-clear" onclick="clearAllHistory()">清除全部</button>
+    </div>
+    <div class="video-grid history-grid" id="continueGrid" style="grid-template-columns:repeat(5,1fr)"></div>
+  </div>
+
+  <div class="section">
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="video-grid" id="videoGrid"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</main>
+
+<div class="detail-overlay" id="detailOverlay" style="display:none;">
+  <button class="back-btn" onclick="closeDetail()">&#8592;</button>
+  <div class="detail-header">
+    <div class="detail-header-bg" id="detailBg"></div>
+    <div class="detail-header-content">
+      <div class="detail-poster"><img id="detailPoster" src="" alt=""></div>
+      <div class="detail-info">
+        <h1 id="detailTitle"></h1>
+        <div class="tags" id="detailTags"></div>
+        <div class="desc" id="detailDesc"></div>
+        <button class="detail-resume hidden" id="resumeBtn" onclick="resumePlayback()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          <span id="resumeText">继续播放</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="player-section">
+    <div class="player-container" id="playerContainer">
+      <video id="videoPlayer" controls crossorigin="anonymous" playsinline></video>
+    </div>
+    <div class="section-header"><div class="section-title">选集播放</div></div>
+    <div class="episode-list" id="episodeList"></div>
+  </div>
+</div>
+
+<footer class="footer">影视资源站 - 所有资源均来自互联网，仅供学习交流使用</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+// ===== Config =====
+var API_BASE = 'https://api.apibdzy.com/api.php/provide/vod/';
+var CORS_PROXIES = [
+  'https://api.codetabs.com/v1/proxy/?quest=',
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url='
+];
+var activeProxy = CORS_PROXIES[0];
+
+var HISTORY_KEY = 'video_site_history';
+var MAX_HISTORY = 50;
+var SAVE_INTERVAL = 5000;
+var PROGRESS_THRESHOLD = 5;
+
+var CAT_MAP = {
+  '电影':   [1, 6, 7, 8, 9, 10, 11, 12, 39, 62, 70],
+  '电视剧': [2, 13, 14, 15, 16, 17, 18, 19, 23, 54, 55, 56, 57, 58, 59, 60, 64, 65, 66, 67, 68, 69],
+  '综艺':   [3, 25, 26, 27, 28, 47, 48, 49, 50, 52, 53],
+  '动漫':   [4, 29, 30, 31, 44, 45, 63]
+};
+
+var state = {
+  page:1, filter:'', search:'', detailData:null, hls:null, loading:false,
+  saveTimer:null, currentEpisodes:[], currentEpisodeIdx:-1,
+  pendingResume:null, seekCleanup:null,
+  catPageCache:{}, // cache for category multi-fetch
+  typeNames:{}
+};
+
+// ===== API via CORS Proxy =====
+function showLoading(show) {
+  document.getElementById('loadingBar').style.display = show ? 'block' : 'none';
+}
+
+function fetchWithProxy(url) {
+  return new Promise(function(resolve, reject) {
+    var proxyUrl = activeProxy + encodeURIComponent(url);
+    fetch(proxyUrl)
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(resolve)
+      .catch(function(err) {
+        // Try next proxy
+        var idx = CORS_PROXIES.indexOf(activeProxy);
+        if (idx < CORS_PROXIES.length - 1) {
+          activeProxy = CORS_PROXIES[idx + 1];
+          var nextUrl = activeProxy + encodeURIComponent(url);
+          fetch(nextUrl).then(function(r2) {
+            if (!r2.ok) throw new Error('HTTP ' + r2.status);
+            return r2.json();
+          }).then(resolve).catch(reject);
+        } else {
+          reject(err);
+        }
+      });
+  });
+}
+
+function buildApiUrl(params) {
+  var q = [];
+  for (var k in params) {
+    if (params.hasOwnProperty(k) && params[k]) {
+      q.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
+    }
+  }
+  return API_BASE + '?' + q.join('&');
+}
+
+// Fetch from upstream API via CORS proxy
+function fetchApi(params) {
+  return fetchWithProxy(buildApiUrl(params));
+}
+
+// Fetch M3U8 content and fix relative paths
+function fetchM3u8Content(url) {
+  return fetchWithProxy(url).catch(function() {
+    // Try direct fetch (CDN usually allows CORS)
+    return fetch(url).then(function(r) { return r.text(); });
+  });
+}
+
+function normalizeVideoList(data) {
+  if (!data || data.code !== 1) return { code: 0, list: [], pagecount: 0, total: 0 };
+  // Cache type names from class field
+  if (data.class) {
+    for (var i = 0; i < data.class.length; i++) {
+      var c = data.class[i];
+      if (c.type_id && c.type_name) state.typeNames[String(c.type_id)] = c.type_name;
+    }
+  }
+  var list = (data.list || []).map(function(v) {
+    return {
+      vod_id: v.vod_id || '',
+      vod_name: v.vod_name || '',
+      type_name: v.type_name || state.typeNames[String(v.type_id)] || '',
+      vod_pic: v.vod_pic || '',
+      vod_year: v.vod_year || '',
+      vod_area: v.vod_area || '',
+      vod_remarks: v.vod_remarks || '',
+      vod_lang: v.vod_lang || '',
+      vod_actor: v.vod_actor || '',
+      vod_director: v.vod_director || '',
+      vod_content: v.vod_content || v.vod_blurb || '',
+      type_id: v.type_id || ''
+    };
+  });
+  return {
+    code: 1,
+    list: list,
+    pagecount: data.pagecount || 0,
+    total: data.total || list.length
+  };
+}
+
+function normalizeDetail(v) {
+  return {
+    vod_id: v.vod_id || '',
+    vod_name: v.vod_name || '',
+    type_name: v.type_name || state.typeNames[String(v.type_id)] || '',
+    vod_pic: v.vod_pic || '',
+    vod_year: v.vod_year || '',
+    vod_area: v.vod_area || '',
+    vod_remarks: v.vod_remarks || '',
+    vod_lang: v.vod_lang || '',
+    vod_actor: v.vod_actor || '',
+    vod_director: v.vod_director || '',
+    vod_content: v.vod_content || v.vod_blurb || '',
+    vod_play_url: v.vod_play_url || '',
+    vod_play_from: v.vod_play_from || ''
+  };
+}
+
+// ===== API Endpoints (replicate backend logic in frontend) =====
+function apiHome(pg) {
+  return fetchApi({ ac: 'videolist', pg: pg || 1, pagesize: 20 }).then(normalizeVideoList);
+}
+
+function apiList(t, pg) {
+  if (!t) return apiHome(pg);
+
+  var subIds = CAT_MAP[t];
+  if (subIds) {
+    // Fetch from all sub-types in parallel
+    var cacheKey = t + '_pg' + (pg || 1);
+    if (state.catPageCache[cacheKey]) {
+      return Promise.resolve(state.catPageCache[cacheKey]);
+    }
+
+    return Promise.all(
+      subIds.map(function(id) { return fetchApi({ ac: 'videolist', t: id, pg: 1, pagesize: 10 }); })
+    ).then(function(results) {
+      var all = [];
+      var total = 0;
+      for (var i = 0; i < results.length; i++) {
+        var r = results[i];
+        if (r && r.code === 1) {
+          var norm = normalizeVideoList(r);
+          all = all.concat(norm.list);
+          total += r.total || 0;
+        }
+      }
+      // Deduplicate
+      var seen = {};
+      all = all.filter(function(v) {
+        if (seen[v.vod_id]) return false;
+        seen[v.vod_id] = true;
+        return true;
+      });
+      all.sort(function(a, b) { return (b.vod_id || 0) - (a.vod_id || 0); });
+      var limit = 20;
+      var start = ((pg || 1) - 1) * limit;
+      var pageItems = all.slice(start, start + limit);
+      var pagecount = Math.max(1, Math.ceil(all.length / limit));
+      var result = { code: 1, list: pageItems, pagecount: pagecount, total: all.length };
+      state.catPageCache[cacheKey] = result;
+      return result;
+    });
+  }
+
+  return fetchApi({ ac: 'videolist', t: t, pg: pg || 1, pagesize: 20 }).then(normalizeVideoList);
+}
+
+function apiSearch(wd, pg) {
+  return fetchApi({ ac: 'list', wd: wd, pg: pg || 1, pagesize: 20 }).then(normalizeVideoList);
+}
+
+function apiDetail(ids) {
+  return fetchApi({ ac: 'detail', ids: ids }).then(function(data) {
+    if (!data || data.code !== 1 || !data.list || !data.list[0]) return { code: 0, list: [] };
+    return { code: 1, list: [normalizeDetail(data.list[0])] };
+  });
+}
+
+// ===== History Module =====
+function getHistory() {
+  try { var d = localStorage.getItem(HISTORY_KEY); return d ? JSON.parse(d) : []; }
+  catch(e) { return []; }
+}
+function saveHistory(list) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, MAX_HISTORY))); }
+  catch(e) {}
+}
+function addOrUpdateHistory(item) {
+  var idStr = String(item.vod_id || '');
+  var list = getHistory().filter(function(h) { return String(h.vod_id) !== idStr; });
+  item.vod_id = idStr;
+  item.timestamp = Date.now();
+  list.unshift(item);
+  saveHistory(list);
+  renderContinueSection();
+}
+function removeFromHistory(vodId) {
+  var idStr = String(vodId);
+  saveHistory(getHistory().filter(function(h) { return String(h.vod_id) !== idStr; }));
+  renderContinueSection();
+}
+function getHistoryForVideo(vodId) {
+  var idStr = String(vodId);
+  return getHistory().find(function(h) { return String(h.vod_id) === idStr; });
+}
+function clearAllHistory() {
+  if (!confirm('确定要清除所有播放记录吗？')) return;
+  saveHistory([]);
+  renderContinueSection();
+  showToast('播放记录已清除');
+}
+function formatTime(sec) {
+  if (!sec || sec < 0 || isNaN(sec)) return '00:00';
+  var m = Math.floor(sec / 60), s = Math.floor(sec % 60), h = Math.floor(m / 60);
+  if (h > 0) { m = m % 60; return (h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+function formatRelativeTime(ts) {
+  if (!ts) return '';
+  var d = Date.now() - ts, mins = Math.floor(d/60000);
+  if (mins < 1) return '刚刚';
+  if (mins < 60) return mins + '分钟前';
+  var hrs = Math.floor(mins/60);
+  if (hrs < 24) return hrs + '小时前';
+  var days = Math.floor(hrs/24);
+  if (days < 30) return days + '天前';
+  return new Date(ts).toLocaleDateString();
+}
+
+// ===== Render Continue Section =====
+function renderContinueSection() {
+  var section = document.getElementById('continueSection');
+  var grid = document.getElementById('continueGrid');
+  var history = getHistory();
+  if (!history.length || state.search || state.filter) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+  grid.innerHTML = history.slice(0, 10).map(function(h) {
+    var fc = (h.vod_name||'').charAt(0);
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280"><rect fill="%2322255a" width="200" height="280"/><text x="50%" y="50%" fill="%23555" text-anchor="middle" dy=".3em" font-size="40">' + esc(fc) + '</text></svg>';
+    var ph = 'data:image/svg+xml,' + svg;
+    var pct = (h.duration>0 && h.progress>0) ? Math.min(100,(h.progress/h.duration)*100) : 0;
+    return '<div class="video-card history-card" data-id="'+esc(h.vod_id)+'" onclick="openDetailAndResume(this.dataset.id)">'
+      +'<div class="poster">'
+        +'<img src="'+esc(h.vod_pic||ph)+'" alt="" loading="lazy" onerror="this.onerror=null;this.src=\''+ph+'\'">'
+        +(h.type_name?'<span class="badge">'+esc(h.type_name)+'</span>':'')
+        +'<div class="progress-bar" style="width:'+pct.toFixed(1)+'%"></div>'
+        +'<div class="play-icon"><svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><polygon points="6,3 20,12 6,21"/></svg></div>'
+      +'</div>'
+      +'<div class="info">'
+        +'<h3>'+esc(h.vod_name)+'</h3>'
+        +(h.episode_name?'<div class="ep-info">'+esc(h.episode_name)+'</div>':'')
+        +'<div class="time-info">'
+          +(h.duration>0&&h.progress>0?formatTime(h.progress)+' / '+formatTime(h.duration)+'  ·  ':'')
+          +formatRelativeTime(h.timestamp)
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+// ===== Save Progress =====
+function startProgressSave() {
+  stopProgressSave();
+  state.saveTimer = setInterval(doSaveProgress, SAVE_INTERVAL);
+}
+function stopProgressSave() {
+  if (state.saveTimer) { clearInterval(state.saveTimer); state.saveTimer = null; }
+}
+function doSaveProgress() {
+  var video = document.getElementById('videoPlayer');
+  if (!video || !state.detailData) return;
+  var ct = video.currentTime || 0, dur = video.duration || 0;
+  if (ct < PROGRESS_THRESHOLD) return;
+  var activeBtn = document.querySelector('.episode-btn.active');
+  if (!activeBtn) return;
+  var btns = document.querySelectorAll('.episode-btn');
+  var epIdx = Array.prototype.indexOf.call(btns, activeBtn);
+  console.log('[History] Saving:', state.detailData.vod_id, activeBtn.textContent, formatTime(ct)+'/'+formatTime(dur));
+  addOrUpdateHistory({
+    vod_id: state.detailData.vod_id,
+    vod_name: state.detailData.vod_name,
+    vod_pic: state.detailData.vod_pic,
+    type_name: state.detailData.type_name,
+    vod_remarks: state.detailData.vod_remarks,
+    episode_idx: epIdx,
+    episode_name: activeBtn.textContent,
+    progress: ct,
+    duration: dur
+  });
+}
+function saveProgressNow() { doSaveProgress(); }
+
+// ===== Resume =====
+function resumePlayback() {
+  if (!state.pendingResume) return;
+  var r = state.pendingResume;
+  state.pendingResume = null;
+  document.getElementById('resumeBtn').classList.add('hidden');
+  playEpisode(r.episodeIdx, r.progress);
+}
+
+// ===== Helpers =====
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderVideoGrid(videos) {
+  var grid = document.getElementById('videoGrid');
+  if (!videos || !videos.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>暂无内容</p></div>';
+    return;
+  }
+  grid.innerHTML = videos.map(function(v) {
+    var fc = (v.vod_name||'').charAt(0);
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280"><rect fill="%2322255a" width="200" height="280"/><text x="50%" y="50%" fill="%23555" text-anchor="middle" dy=".3em" font-size="40">' + esc(fc) + '</text></svg>';
+    var ph = 'data:image/svg+xml,' + svg;
+    var hasPic = !!(v.vod_pic && v.vod_pic.trim());
+    return '<div class="video-card" data-id="'+esc(v.vod_id)+'" '+(hasPic?'':'data-needs-cover="1"')+' onclick="openDetailById(this.dataset.id)">'
+      +'<div class="poster">'
+        +'<img src="'+esc(v.vod_pic||ph)+'" alt="" loading="lazy" onerror="this.onerror=null;this.src=\''+ph+'\'">'
+        +(v.type_name?'<span class="badge">'+esc(v.type_name)+'</span>':'')
+        +(v.vod_remarks?'<span class="note">'+esc(v.vod_remarks)+'</span>':'')
+      +'</div>'
+      +'<div class="info">'
+        +'<h3>'+esc(v.vod_name)+'</h3>'
+        +'<div class="meta">'
+          +(v.vod_year?'<span>'+esc(v.vod_year)+'</span>':'')
+          +(v.vod_area?'<span>'+esc(v.vod_area)+'</span>':'')
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+
+  // Lazy cover loading
+  lazyLoadCovers(grid);
+}
+
+// Lazy cover loader
+var coverCache = {};
+var coverObserver = null;
+function initCoverObserver() {
+  if (coverObserver) coverObserver.disconnect();
+  coverObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var card = entry.target;
+        var img = card.querySelector('img');
+        var vodId = card.dataset.id;
+        if (!vodId || !img) return;
+        if (coverCache[vodId]) { img.src = coverCache[vodId]; coverObserver.unobserve(card); return; }
+        apiDetail(vodId).then(function(data) {
+          if (data && data.code === 1 && data.list && data.list[0]) {
+            var pic = data.list[0].vod_pic;
+            if (pic) { coverCache[vodId] = pic; img.src = pic; }
+          }
+        }).catch(function(){});
+        coverObserver.unobserve(card);
+      }
+    });
+  }, { rootMargin: '100px' });
+}
+function lazyLoadCovers(grid) {
+  if (!coverObserver) initCoverObserver();
+  grid.querySelectorAll('[data-needs-cover]').forEach(function(card) { coverObserver.observe(card); });
+}
+
+function renderPagination(data) {
+  var pg = document.getElementById('pagination');
+  var list = (data && data.list) || [];
+  var total = data ? (data.total || 0) : 0;
+  var hasMore = list.length >= 20 || (total > 0 && state.page * 20 < total);
+  if (state.page <= 1 && !hasMore) { pg.innerHTML = ''; return; }
+  var html = '<button '+(state.page<=1?'disabled':'')+' onclick="loadPage('+(state.page-1)+')">上一页</button>';
+  html += '<span style="color:var(--text-secondary);font-size:.85rem;padding:0 .5rem">第 '+state.page+' 页</span>';
+  html += '<button '+(!hasMore?'disabled':'')+' onclick="loadPage('+(state.page+1)+')">下一页</button>';
+  pg.innerHTML = html;
+}
+
+function renderFilterBar() {
+  var bar = document.getElementById('filterBar');
+  var cats = ['全部','电影','电视剧','综艺','动漫','纪录片'];
+  bar.innerHTML = cats.map(function(c) {
+    var id = c==='全部'?'':c;
+    return '<span class="filter-tag '+(state.filter===id?'active':'')+'" onclick="filterBy(\''+id+'\')">'+esc(c)+'</span>';
+  }).join('');
+}
+
+// ===== Data Loading =====
+function loadData() {
+  if (state.loading) return;
+  state.loading = true;
+  showLoading(true);
+  var grid = document.getElementById('videoGrid');
+  grid.innerHTML = Array(10).fill('<div class="video-card"><div class="poster skeleton"></div></div>').join('');
+  document.getElementById('pagination').innerHTML = '';
+
+  var promise;
+  if (state.search) {
+    promise = apiSearch(state.search, state.page);
+  } else if (state.filter === '__history__') {
+    renderHistoryPage();
+    state.loading = false;
+    showLoading(false);
+    return;
+  } else if (state.filter) {
+    promise = apiList(state.filter, state.page);
+  } else {
+    promise = apiHome(state.page);
+  }
+
+  promise.then(function(data) {
+    showLoading(false);
+    if (!data || data.code !== 1) {
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>加载失败，请稍后重试</p></div>';
+      state.loading = false;
+      return;
+    }
+    renderVideoGrid(data.list || []);
+    renderPagination(data);
+    state.loading = false;
+  }).catch(function(e) {
+    showLoading(false);
+    console.error('[API Error]', e);
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>网络错误，请检查网络后重试</p></div>';
+    state.loading = false;
+  });
+}
+
+function renderHistoryPage() {
+  var grid = document.getElementById('videoGrid');
+  var history = getHistory();
+  document.getElementById('pagination').innerHTML = '';
+  if (!history.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><p>暂无播放记录</p></div>';
+    return;
+  }
+  grid.innerHTML = history.map(function(h) {
+    var fc = (h.vod_name||'').charAt(0);
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280"><rect fill="%2322255a" width="200" height="280"/><text x="50%" y="50%" fill="%23555" text-anchor="middle" dy=".3em" font-size="40">' + esc(fc) + '</text></svg>';
+    var ph = 'data:image/svg+xml,' + svg;
+    var pct = (h.duration>0&&h.progress>0)?Math.min(100,(h.progress/h.duration)*100):0;
+    return '<div class="video-card history-card" data-id="'+esc(h.vod_id)+'">'
+      +'<div class="poster" onclick="openDetailAndResume(\''+esc(h.vod_id)+'\')">'
+        +'<img src="'+esc(h.vod_pic||ph)+'" alt="" loading="lazy" onerror="this.onerror=null;this.src=\''+ph+'\'">'
+        +(h.type_name?'<span class="badge">'+esc(h.type_name)+'</span>':'')
+        +'<div class="progress-bar" style="width:'+pct.toFixed(1)+'%"></div>'
+        +'<div class="play-icon"><svg viewBox="0 0 24 24" fill="#fff" width="18" height="18"><polygon points="6,3 20,12 6,21"/></svg></div>'
+      +'</div>'
+      +'<div class="info">'
+        +'<h3 onclick="openDetailAndResume(\''+esc(h.vod_id)+'\')">'+esc(h.vod_name)+'</h3>'
+        +(h.episode_name?'<div class="ep-info">'+esc(h.episode_name)+'</div>':'')
+        +'<div class="time-info">'
+          +(h.duration>0&&h.progress>0?formatTime(h.progress)+' / '+formatTime(h.duration)+'  ·  ':'')
+          +formatRelativeTime(h.timestamp)
+          +'  <span style="cursor:pointer;color:var(--primary);margin-left:.3rem" onclick="event.stopPropagation();removeHistoryItem(\''+esc(h.vod_id)+'\')">删除</span>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function removeHistoryItem(vodId) {
+  removeFromHistory(vodId);
+  if (state.filter === '__history__') renderHistoryPage();
+}
+
+// ===== Detail & Player =====
+function openDetailById(id) { _openDetail(id, false); }
+function openDetailAndResume(id) { _openDetail(id, true); }
+
+function _openDetail(id, autoResume) {
+  var overlay = document.getElementById('detailOverlay');
+  overlay.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  showLoading(true);
+
+  var hist = getHistoryForVideo(id);
+  state.pendingResume = null;
+  console.log('[Detail] Opening', id, 'autoResume:', autoResume, 'history:', hist?'found':'none');
+
+  apiDetail(id).then(function(data) {
+    showLoading(false);
+    if (!data || data.code !== 1 || !data.list || !data.list[0]) {
+      showToast('加载详情失败'); closeDetail(); return;
+    }
+    var v = data.list[0];
+    state.detailData = v;
+
+    document.getElementById('detailBg').style.backgroundImage = v.vod_pic ? 'url('+esc(v.vod_pic)+')' : 'none';
+    document.getElementById('detailPoster').src = v.vod_pic || '';
+    document.getElementById('detailTitle').textContent = v.vod_name || '';
+
+    var tags = [];
+    if (v.type_name) tags.push(v.type_name);
+    if (v.vod_year) tags.push(v.vod_year);
+    if (v.vod_area) tags.push(v.vod_area);
+    if (v.vod_remarks) tags.push(v.vod_remarks);
+    if (v.vod_actor) { var a = v.vod_actor.split(/[,，]/); if (a.length) tags.push('主演: '+a.slice(0,3).join(' / ')); }
+    if (v.vod_director) tags.push('导演: '+v.vod_director);
+    document.getElementById('detailTags').innerHTML = tags.map(function(t) { return '<span>'+esc(t)+'</span>'; }).join('');
+    document.getElementById('detailDesc').textContent = v.vod_content || '暂无简介';
+
+    renderEpisodes(v.vod_play_url);
+
+    var resumeBtn = document.getElementById('resumeBtn');
+    var resumeText = document.getElementById('resumeText');
+    if (hist && hist.episode_idx >= 0 && hist.progress > PROGRESS_THRESHOLD) {
+      var epIdx = parseInt(hist.episode_idx, 10) || 0;
+      var progress = parseFloat(hist.progress) || 0;
+      state.pendingResume = { episodeIdx: epIdx, progress: progress };
+      var epName = hist.episode_name || ('第'+(epIdx+1)+'集');
+      resumeText.textContent = '继续播放 ' + epName + ' (' + formatTime(progress) + ')';
+      resumeBtn.classList.remove('hidden');
+      console.log('[Detail] Resume: epIdx='+epIdx+' progress='+formatTime(progress));
+      if (autoResume) { setTimeout(resumePlayback, 300); }
+    } else {
+      resumeBtn.classList.add('hidden');
+      if (autoResume && state.currentEpisodes.length > 0) { setTimeout(function(){ playEpisode(0); }, 300); }
+    }
+    window.scrollTo(0, 0);
+  }).catch(function(e) {
+    showLoading(false);
+    console.error('[Detail] Error:', e);
+    showToast('加载失败'); closeDetail();
+  });
+}
+
+function renderEpisodes(playUrl) {
+  var container = document.getElementById('episodeList');
+  if (!playUrl) { container.innerHTML = '<p style="color:var(--text-muted)">暂无播放资源</p>'; return; }
+  var sep = playUrl.indexOf('#') > -1 ? '#' : '$$$';
+  var episodes = playUrl.split(sep).filter(function(s){return s.trim();}).map(function(s) {
+    var idx = s.indexOf('$');
+    return idx > -1 ? { name: s.substring(0, idx), url: s.substring(idx+1) } : { name: '播放', url: s };
+  }).filter(function(e){return e.url;});
+  state.currentEpisodes = episodes;
+  if (!episodes.length) { container.innerHTML = '<p style="color:var(--text-muted)">暂无播放资源</p>'; return; }
+  container.innerHTML = episodes.map(function(ep, i) {
+    return '<button class="episode-btn" data-idx="'+i+'" data-url="'+esc(ep.url)+'" onclick="playEpisode('+i+')">'+esc(ep.name)+'</button>';
+  }).join('');
+}
+
+function playEpisode(index, seekTo) {
+  var btns = document.querySelectorAll('.episode-btn');
+  if (!btns[index]) return;
+  btns.forEach(function(b){b.classList.remove('active');});
+  btns[index].classList.add('active');
+  state.currentEpisodeIdx = index;
+
+  var url = btns[index].dataset.url;
+  if (!url) return;
+
+  var container = document.getElementById('playerContainer');
+  container.innerHTML = '<video id="videoPlayer" controls crossorigin="anonymous" playsinline></video>';
+  var video = document.getElementById('videoPlayer');
+
+  if (state.seekCleanup) { state.seekCleanup(); state.seekCleanup = null; }
+  if (state.hls) { state.hls.destroy(); state.hls = null; }
+
+  var isM3u8 = /\.m3u8/i.test(url);
+  // CDN has CORS headers, use direct URL for m3u8
+  var playUrl = url;
+
+  var seekTarget = (typeof seekTo === 'number' && seekTo > 0) ? seekTo : 0;
+  var hasSeeked = false;
+
+  function cleanupSeekListeners() {
+    video.removeEventListener('loadedmetadata', onLoaded);
+    video.removeEventListener('durationchange', onDuration);
+    video.removeEventListener('canplay', onCanPlay);
+    video.removeEventListener('timeupdate', onTimeUpdate);
+  }
+
+  function doSeek() {
+    if (hasSeeked || seekTarget <= 0) return;
+    var seekable = video.seekable;
+    if (seekable && seekable.length > 0) {
+      var start = seekable.start(0), end = seekable.end(0);
+      if (seekTarget >= start && seekTarget <= end) {
+        video.currentTime = seekTarget; hasSeeked = true; cleanupSeekListeners(); return;
+      }
+      if (video.duration > 0 && seekTarget < video.duration) {
+        video.currentTime = seekTarget; hasSeeked = true; cleanupSeekListeners(); return;
+      }
+    } else if (video.duration > 0 && video.duration >= seekTarget) {
+      video.currentTime = seekTarget; hasSeeked = true; cleanupSeekListeners(); return;
+    }
+  }
+
+  function onLoaded() { doSeek(); }
+  function onDuration() { doSeek(); }
+  function onCanPlay() { doSeek(); }
+  function onTimeUpdate() {
+    if (!hasSeeked && seekTarget > 0 && video.currentTime < 2) doSeek();
+  }
+
+  video.addEventListener('loadedmetadata', onLoaded);
+  video.addEventListener('durationchange', onDuration);
+  video.addEventListener('canplay', onCanPlay);
+  video.addEventListener('timeupdate', onTimeUpdate);
+  state.seekCleanup = cleanupSeekListeners;
+
+  if (isM3u8 && typeof Hls !== 'undefined' && Hls.isSupported()) {
+    state.hls = new Hls({ maxBufferLength: 30, maxMaxBufferLength: 60 });
+    state.hls.loadSource(playUrl);
+    state.hls.attachMedia(video);
+    state.hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      console.log('[HLS] Manifest parsed, duration:', video.duration);
+      video.play().catch(function(){});
+      doSeek();
+    });
+    state.hls.on(Hls.Events.ERROR, function(_, data) {
+      if (data.fatal) {
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) state.hls.startLoad();
+        else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) state.hls.recoverMediaError();
+        else fallbackIframe(container, url);
+      }
+    });
+  } else if (isM3u8 && video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = playUrl;
+    video.addEventListener('loadedmetadata', function(){ video.play().catch(function(){}); doSeek(); });
+  } else if (/\.(mp4|webm)$/i.test(url)) {
+    video.src = playUrl;
+    video.addEventListener('loadedmetadata', function(){ doSeek(); video.play().catch(function(){}); });
+  } else {
+    fallbackIframe(container, url);
+  }
+
+  startProgressSave();
+  document.getElementById('resumeBtn').classList.add('hidden');
+  state.pendingResume = null;
+}
+
+function fallbackIframe(container, url) {
+  container.innerHTML = '<iframe src="'+esc(url)+'" allowfullscreen></iframe>';
+  stopProgressSave();
+}
+
+// ===== Navigation =====
+function goHome() {
+  state.page=1; state.filter=''; state.search=''; state.catPageCache={};
+  document.getElementById('searchInput').value='';
+  document.getElementById('heroTitle').innerHTML='海量影视 <em>免费在线看</em>';
+  document.getElementById('heroDesc').textContent='收录电影、电视剧、动漫、综艺等海量资源，M3U8高清在线播放';
+  updateNav(''); closeDetail(); renderContinueSection(); loadData();
+}
+function goHistory(el) {
+  state.page=1; state.filter='__history__'; state.search='';
+  document.getElementById('searchInput').value='';
+  document.getElementById('heroTitle').innerHTML='播放 <em>历史记录</em>';
+  document.getElementById('heroDesc').textContent='继续观看上次未看完的视频';
+  updateNav('__history__'); closeDetail(); loadData(); window.scrollTo(0,0);
+}
+function goCategory(cat) {
+  state.page=1; state.filter=cat; state.search=''; state.catPageCache={};
+  document.getElementById('searchInput').value='';
+  document.getElementById('heroTitle').textContent=cat||'全部影视';
+  document.getElementById('heroDesc').textContent='最新'+(cat||'影视')+'资源推荐';
+  updateNav(cat); closeDetail(); renderContinueSection(); loadData(); window.scrollTo(0,0);
+}
+function filterBy(id) {
+  state.page=1; state.filter=id; state.search=''; state.catPageCache={};
+  document.getElementById('heroTitle').textContent=id||'全部影视';
+  renderFilterBar(); renderContinueSection(); loadData(); window.scrollTo(0,0);
+}
+function doSearch() {
+  var wd = document.getElementById('searchInput').value.trim();
+  if (!wd) return;
+  state.search=wd; state.page=1; state.filter=''; state.catPageCache={};
+  document.getElementById('heroTitle').innerHTML='搜索: <em>'+esc(wd)+'</em>';
+  document.getElementById('heroDesc').textContent='搜索结果';
+  updateNav(''); loadData(); window.scrollTo(0,0);
+}
+function loadPage(pg) { state.page=pg; loadData(); window.scrollTo(0,0); }
+function closeDetail() {
+  saveProgressNow(); stopProgressSave();
+  document.getElementById('detailOverlay').style.display='none';
+  document.body.style.overflow='';
+  if (state.hls){state.hls.destroy();state.hls=null;}
+  if (state.seekCleanup){state.seekCleanup();state.seekCleanup=null;}
+  document.getElementById('playerContainer').innerHTML='<video id="videoPlayer" controls crossorigin="anonymous" playsinline></video>';
+  state.detailData=null; state.pendingResume=null;
+}
+function updateNav(cat) {
+  document.querySelectorAll('#mainNav a').forEach(function(a) {
+    var onclick = a.getAttribute('onclick') || '';
+    var isHistory = onclick.indexOf('goHistory') > -1;
+    var isActive = false;
+    if (isHistory) isActive = (cat === '__history__');
+    else if (cat === '') isActive = a.textContent.trim() === '首页';
+    else isActive = onclick.indexOf("'"+cat+"'") > -1;
+    a.classList.toggle('active', isActive);
+  });
+}
+function showToast(msg) {
+  var t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(function(){t.remove();}, 2000);
+}
+
+// ===== Init =====
+renderFilterBar();
+renderContinueSection();
+loadData();
+
+window.addEventListener('beforeunload', function(){ saveProgressNow(); });
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') saveProgressNow();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('detailOverlay').style.display !== 'none') closeDetail();
+});
+
+// Expose to global
+window.goHome=goHome; window.goHistory=goHistory; window.goCategory=goCategory;
+window.filterBy=filterBy; window.doSearch=doSearch; window.loadPage=loadPage;
+window.closeDetail=closeDetail; window.openDetailById=openDetailById;
+window.openDetailAndResume=openDetailAndResume; window.playEpisode=playEpisode;
+window.resumePlayback=resumePlayback; window.clearAllHistory=clearAllHistory;
+window.removeHistoryItem=removeHistoryItem;
+})();
+</script>
+</body>
+</html>
