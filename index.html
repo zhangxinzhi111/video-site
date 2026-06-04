@@ -300,22 +300,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC
 'use strict';
 
 // ===== Mobile UI helpers =====
+var mobileSearchOpen = false;
 function toggleSearch() {
   var box = document.getElementById('searchBox');
   var isHidden = box.classList.contains('hidden-mobile') || !box.classList.contains('visible-mobile');
   if (isHidden) {
     box.classList.remove('hidden-mobile');
     box.classList.add('visible-mobile');
+    mobileSearchOpen = true;
     document.getElementById('searchInput').focus();
   } else {
     box.classList.remove('visible-mobile');
     box.classList.add('hidden-mobile');
+    mobileSearchOpen = false;
   }
 }
 function closeMobileSearch() {
   var box = document.getElementById('searchBox');
   box.classList.remove('visible-mobile');
   box.classList.add('hidden-mobile');
+  mobileSearchOpen = false;
 }
 function toggleNavDropdown(e) {
   e.stopPropagation();
@@ -344,14 +348,18 @@ function updateMobileUI() {
   var moreBtn = document.querySelector('.nav-more');
   if (isMobile) {
     toggle.style.display = 'flex';
-    box.classList.add('hidden-mobile');
-    box.classList.remove('visible-mobile');
+    // Don't close search box if user intentionally opened it (keyboard may trigger resize)
+    if (!mobileSearchOpen) {
+      box.classList.add('hidden-mobile');
+      box.classList.remove('visible-mobile');
+    }
     // Show "more" button, hide extra nav items
     if (moreBtn) moreBtn.style.display = 'block';
   } else {
     toggle.style.display = 'none';
     box.classList.remove('hidden-mobile');
     box.classList.remove('visible-mobile');
+    mobileSearchOpen = false;
     if (moreBtn) moreBtn.style.display = 'none';
     document.getElementById('navDropdown').classList.remove('show');
   }
